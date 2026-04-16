@@ -1,0 +1,182 @@
+local Window = loadstring(game:HttpGet('https://github.com/Footagesus/WindUI/releases/latest/download/main.lua'))():CreateWindow({
+    User = {
+        Enabled = true,
+        Callback = function()
+            print('clicked')
+        end,
+        Anonymous = true,
+    },
+    SideBarWidth = 200,
+    Author = 'Made by Ecrxks27',
+    Resizable = true,
+    ScrollBarEnabled = false,
+    Folder = 'NexifyHub',
+    HideSearchBar = true,
+    Title = 'Nexify Hub 🎯 | Silent Scripts',
+    Transparent = true,
+    BackgroundImageTransparency = 0.42,
+    Background = '',
+    Theme = 'Dark',
+    Size = UDim2.fromOffset(580, 460),
+})
+local Players = game:GetService('Players')
+local RunService = game:GetService('RunService')
+local LocalPlayer = Players.LocalPlayer
+local MainTab = Window:Tab({
+    Title = 'Main',
+    Icon = 'house',
+})
+local espEnabled = false
+local espParts = {}
+MainTab:Toggle({
+    Type = 'Checkbox',
+    Title = 'Player ESP',
+    Callback = function(value)
+        espEnabled = value
+        for _, part in ipairs(espParts) do
+            if part and part.Parent then
+                part:Destroy()
+            end
+        end
+        table.clear(espParts)
+        if espEnabled then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    local hrp = player.Character:FindFirstChild('HumanoidRootPart')
+                    if hrp then
+                        local box = Instance.new('Part')
+                        box.Anchored = true
+                        box.CanCollide = false
+                        box.Transparency = 0.7
+                        box.Size = Vector3.new(4, 6, 4)
+                        box.Color = Color3.fromRGB(255, 0, 0)
+                        box.Material = Enum.Material.Neon
+                        box.Name = 'BoxESP'
+                        box.Parent = workspace
+                        table.insert(espParts, box)
+                        task.spawn(function()
+                            while espEnabled and box.Parent and hrp.Parent do
+                                box.Position = hrp.Position
+                                task.wait(0.1)
+                            end
+                            if box.Parent then box:Destroy() end
+                        end)
+                    end
+                end
+            end
+        end
+    end,
+    Icon = 'eye',
+    Default = false,
+})
+local MiscTab = Window:Tab({
+    Title = 'Misc',
+    Icon = 'puzzle',
+})
+local savedPosition = nil
+MiscTab:Button({
+    Callback = function()
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild('HumanoidRootPart') then
+            savedPosition = char.HumanoidRootPart.Position
+            char.HumanoidRootPart.CFrame = CFrame.new(0.0354887, 472.6259, -6.3956)
+        end
+    end,
+    Title = 'Teleport Secret Place',
+    Icon = 'location-arrow',
+})
+MiscTab:Button({
+    Callback = function()
+        if savedPosition then
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild('HumanoidRootPart') then
+                char.HumanoidRootPart.CFrame = CFrame.new(savedPosition)
+            end
+        end
+    end,
+    Title = 'Teleport to Old Position',
+    Icon = 'undo',
+})
+local MovementTab = Window:Tab({
+    Title = 'Movement',
+    Icon = 'user',
+})
+local noclipEnabled = false
+MovementTab:Toggle({
+    Type = 'Checkbox',
+    Title = 'Noclip',
+    Callback = function(value)
+        noclipEnabled = value
+        if noclipEnabled then
+            RunService.Stepped:Connect(function()
+                if noclipEnabled then
+                    local char = LocalPlayer.Character
+                    if char then
+                        for _, part in ipairs(char:GetDescendants()) do
+                            if part:IsA('BasePart') then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end,
+    Icon = 'check',
+    Default = false,
+})
+MovementTab:Slider({
+    Value = {
+        Min = 32,
+        Default = 32,
+        Max = 200,
+    },
+    Callback = function(value)
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChildOfClass('Humanoid') then
+            char:FindFirstChildOfClass('Humanoid').WalkSpeed = value
+        end
+    end,
+    Title = 'Speed',
+    Step = 1,
+})
+MovementTab:Slider({
+    Value = {
+        Min = 50,
+        Default = 50,
+        Max = 200,
+    },
+    Callback = function(value)
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChildOfClass('Humanoid') then
+            char:FindFirstChildOfClass('Humanoid').JumpPower = value
+        end
+    end,
+    Title = 'JumpPower',
+    Step = 1,
+})
+local SettingsTab = Window:Tab({
+    Title = 'Settings',
+    Icon = 'cog',
+})
+SettingsTab:Button({
+    Callback = function()
+        setclipboard('https://discord.gg/3BNqHvVFn')
+    end,
+    Title = 'Join Discord (Copied to Clipboard)',
+    Icon = 'check',
+})
+SettingsTab:Toggle({
+    Callback = function(value)
+        if value then
+            LocalPlayer.Idled:Connect(function()
+                local VirtualUser = game:GetService('VirtualUser')
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+            end)
+        end
+    end,
+    Default = false,
+    Title = 'Anti AFK',
+    Icon = 'check',
+})
